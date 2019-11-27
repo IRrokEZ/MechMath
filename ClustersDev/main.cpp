@@ -14,8 +14,6 @@ const double eps = 0.0000001;
 
 using namespace std;
 
-//some changes
-
 fstream Mylog;
 
 int MN(int a, int b){
@@ -1370,8 +1368,10 @@ class Cluster{
             fstream launcher;
             launcher.open("launch.log", ios::in | ios::out);
             launcher >> this -> launchNumber;
+            if(this -> launchNumber > 30 || this -> launchNumber < 1){
+                this -> launchNumber = 1;
+            }
             launcher.close();
-
             this -> MyField.reset(new Field(mf -> retALLKOORD()));
         }
         //RUN WAVE
