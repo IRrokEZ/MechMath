@@ -431,7 +431,7 @@ class Field{
         vector <double> allLengths;
         vector <int> label, counters, marks;
 
-        vector <Point> centerKoords, startPoints, save, workPoints, fieldkoord, forClusters;
+        vector <Point> centerKoords, startPoints, save, workPoints, fieldkoord, forClusters, saveData;;
 
         vector <vector <int>> binary_table;
         vector <vector <double>> RO;
@@ -458,10 +458,18 @@ class Field{
             this -> RO.resize(0);
             this -> counters.resize(0);
             this -> forClusters.resize(0);
+            this -> saveData.resize(0);
         }
 //SV <
 //SV >
         void BeforeStart(){
+            if(saveData.size() > 0){
+                this -> workPoints.resize(0);
+                for(unsigned int i = 0; i < this -> saveData.size(); i ++){
+                    this -> workPoints.push_back(Point(this -> saveData[i]));
+                }
+                this -> saveData.resize(0);
+            }
             for(unsigned int i = 0; i < this -> workPoints.size(); i ++){
                 this -> workPoints[i].SetLabel(0);
             }
@@ -646,108 +654,7 @@ class Field{
             this -> allkoord = arrr(filename);
             this -> totalsize = allkoord.size();
         }
-};
-
-class Cluster{
-    private:
-        unique_ptr <Field> myField;
-
-        vector <double> allLengths;
-        vector <int> label, counters, marks;
-
-        vector <Point> centerKoords, startPoints, save, workPoints, fieldkoord, forClusters;
-
-        vector <vector <int>> binary_table;
-        vector <vector <double>> RO;
-
-        double bestWeight, maxRO;
-        int k, fsize, optimalK, launchNumber/*count each launch this part of program*/;
-
-    public:
-        Cluster(){//default constructor
-            fstream launcher;
-            launcher.open("launch.log",  ios::out | ios::trunc);
-            launcher << 1;
-            launcher.close();
-
-            this -> k = 0;
-            this -> maxRO = 0;
-            this -> optimalK = 0;
-            this -> bestWeight = 0;
-            this -> fsize = 0;
-            this -> binary_table.resize(0);
-            this -> RO.resize(0);
-            this -> label.resize(0);
-            this -> allLengths.resize(0); //we will set them after
-            this -> centerKoords.resize(0);
-            this -> startPoints.resize(0);
-            this -> save.resize(0);
-            this -> workPoints.resize(0);
-            this -> fieldkoord.resize(0);
-            this -> counters.resize(0);
-            this -> marks.resize(0);
-            this -> forClusters.resize(0);
-        }
-        Cluster(Field *mf){//constructor
-            fstream launcher;
-            launcher.open("launch.log", ios::in | ios::out);
-            launcher >> this -> launchNumber;
-            launcher.close();
-
-            this -> workPoints = mf -> retALLKOORD();
-            this -> fieldkoord = mf -> retALLKOORD();
-
-            this -> k = 0;
-            this -> maxRO = 0;
-            this -> optimalK = 0;
-            this -> bestWeight = 0;
-            this -> fsize = this -> workPoints.size();
-
-            this -> myField.reset(new Field(this -> workPoints));
-
-            this -> binary_table.resize(this -> workPoints.size());
-            this -> RO.resize(this -> workPoints.size());
-            for(unsigned int i = 0; i < this -> workPoints.size(); i ++){
-                this -> binary_table[i].resize(this -> workPoints.size());
-                this -> RO[i].resize(this -> workPoints.size());
-            }
-
-            this -> label.resize(this -> workPoints.size());
-
-            this -> allLengths.resize(0); //we will set them after
-            this -> centerKoords.resize(0);
-            this -> startPoints.resize(0);
-            this -> save.resize(0);
-            this -> counters.resize(0);
-            this -> marks.resize(0);
-            this -> forClusters.resize(0);
-        }
-
-        void BeforeStart(){
-            for(unsigned int i = 0; i < this -> workPoints.size(); i ++){
-                this -> workPoints[i].SetLabel(0);
-            }
-            this -> fieldkoord = this -> workPoints;
-            this -> allLengths.resize(0); //we will set them after
-            this -> centerKoords.resize(0);
-            this -> startPoints.resize(0);
-            this -> save.resize(0);
-            this -> k = 0;
-            this -> maxRO = 0;
-            this -> optimalK = 0;
-            this -> bestWeight = 0;
-            this -> fsize = this -> workPoints.size();
-            this -> label.resize(this -> workPoints.size());
-            this -> myField.reset(new Field(this -> workPoints));
-            this -> binary_table.resize(this -> workPoints.size());
-            this -> RO.resize(this -> workPoints.size());
-            this -> counters.resize(0);
-            this -> forClusters.resize(0);
-            for(unsigned int i = 0; i < this -> workPoints.size(); i ++){
-                this -> binary_table[i].resize(this -> workPoints.size());
-                this -> RO[i].resize(this -> workPoints.size());
-            }
-        }
+//SV >
         //WAVE
         void CreateRo(){//creating of matrix of distances
             double x1, y1, x2, y2;
@@ -921,53 +828,6 @@ class Cluster{
             }
             bup.close();
         }
-        //RUN WAVE
-        void FindByWaveAlgorithm(){
-            this -> BeforeStart();
-            this -> CreateRo();
-            double threshold = -1;
-            string filename = "Wave" + to_string(this -> launchNumber) + ".txt", accept = "zzz";
-            fstream launcher;
-            this -> launchNumber ++;
-            launcher.open("launch.log", ios::in | ios::out | ios::trunc);
-            launcher << this -> launchNumber;
-            launcher.close();
-            while(threshold < 0){
-                cout << endl << "Please enter your threshold value" << endl;
-                cin >> threshold;
-                if(threshold < 0){
-                    Error(5);
-                }
-                if(threshold > this -> maxRO){
-                    while((accept != "yes") && (accept != "no")){
-                        cout << endl << "Your value is so big. Continue? ('yes'/'no')" << endl;
-                        cin >> accept;
-                        if((accept != "yes") && (accept != "no")){
-                            Error(5);
-                        }
-                    }
-                    if(accept == "no"){
-                        threshold = -1;
-                    }
-                }
-            }
-            this -> GenBinary(threshold);
-            this -> Wave();
-            accept = "zzz";
-            while((accept != "yes") && (accept != "no")){
-                cout << endl << "Do you want to set your file name? ('yes'/'no')" << endl;
-                cin >> accept;
-                if((accept != "yes") && (accept != "no")){
-                    Error(5);
-                }
-            }
-            if(accept == "yes"){
-                cout << endl << "Please enter your filename" << endl;
-                cin >> filename;
-            }
-            this -> ToTxtCluster(filename);
-        }
-        //KMEANS
         void KMeans(int userK){
             int minid, qStart, qEnd, ptr = 0;
             double minVal;
@@ -1114,46 +974,6 @@ class Cluster{
         int RetBestK(){
             return this -> optimalK;
         }
-        //RUN KMEANS
-        void FindByKMeansAlgorithm(){
-            this -> BeforeStart();
-            int userNumberOfClusters = -100;
-            while((userNumberOfClusters != -1) && (userNumberOfClusters < 0)){
-                cout << endl << "Please enter your number of clusters or '-1' to find optimal number" << endl;
-                cin >> userNumberOfClusters;
-                if(userNumberOfClusters > int(this -> workPoints.size())){
-                    userNumberOfClusters = -1000;
-                    cout << endl << "Too big number" << endl;
-                }
-                if((userNumberOfClusters != -1) && (userNumberOfClusters < 0)){
-                    Error(5);
-                }
-            }
-            this -> KMeans(userNumberOfClusters);
-            if(userNumberOfClusters == -1){
-                cout << endl << "Optimal number of clusters is " << this -> RetBestK() << endl
-                << "You could rerun k-means algorithm with that value" << endl;
-            } else {
-                string filename = "K-Means" + to_string(this -> launchNumber) + ".txt", accept = "zzz";
-                fstream launcher;
-                launcher.open("launch.log", ios::in | ios::out | ios::trunc);
-                this -> launchNumber ++;
-                launcher << this -> launchNumber;
-                launcher.close();
-                while((accept != "yes") && (accept != "no")){
-                    cout << endl << "Do you want to set your file name? ('yes'/'no')" << endl;
-                    cin >> accept;
-                    if((accept != "yes") && (accept != "no")){
-                        Error(5);
-                    }
-                }
-                if(accept == "yes"){
-                    cout << endl << "Please enter your filename" << endl;
-                    cin >> filename;
-                }
-                this -> ToTxtCluster(filename);
-            }
-        }
         //SPTR
         void CalculateRo(){//calculate all Ro between all points
             for(unsigned int i = 0; i < this -> workPoints.size(); i ++){
@@ -1222,24 +1042,10 @@ class Cluster{
             }
             text.close();
         }
-        //RUN SPTR
-        void RunSpainningTreeAlgorithm(){
-            string scn1 = "TempGisto" + to_string(this -> launchNumber);
-            fstream launch;
-            this -> BeforeStart();
-            this -> CalculateRo();
-            this -> FillLengths();
-            cout << endl << "You could plot '" << scn1 << "' and choose correct threshold value, then rerun wave algorithm" << endl;
-            this -> launchNumber ++;
-            launch.open("launch.log", ios::in | ios::out | ios::trunc);
-            launch << this -> launchNumber;
-            launch.close();
-            this -> FindByWaveAlgorithm();
-        }
         //HIERARCHY
         void Hierarchy(int userK){
             double x1, y1, x2, y2, minro, midx, midy;
-            vector <Point> newPoints = myField -> retALLKOORD();
+            vector <Point> newPoints = this -> workPoints;
             int p1, p2/*id of point 1 and point 2*/, numpoints = this -> workPoints.size(), numclusters = userK;
             vector <vector <double>> ro;
             while(numpoints != numclusters){
@@ -1313,40 +1119,6 @@ class Cluster{
             this -> k = newPoints.size();
             this -> fsize = this -> workPoints.size();
         }
-        //RUN HIERARCHY
-        void FindByHierarchyAlgorithm(){
-            this -> BeforeStart();
-            int userNumberOfClusters = -100;
-            while((userNumberOfClusters != -1) && (userNumberOfClusters < 0)){
-                cout << endl << "Please enter your number of clusters" << endl;
-                cin >> userNumberOfClusters;
-                if(userNumberOfClusters > int(this -> workPoints.size())){
-                    userNumberOfClusters = -1000;
-                }
-                if(userNumberOfClusters < 0){
-                    Error(5);
-                }
-            }
-            this -> Hierarchy(userNumberOfClusters);
-            string filename = "Hierarchy" + to_string(this -> launchNumber) + ".txt", accept = "zzz";
-            fstream launcher;
-            launcher.open("launch.log", ios::in | ios::out | ios::trunc);
-            this -> launchNumber ++;
-            launcher << this -> launchNumber;
-            launcher.close();
-            while((accept != "yes") && (accept != "no")){
-                cout << endl << "Do you want to set your file name? ('yes'/'no')" << endl;
-                cin >> accept;
-                if((accept != "yes") && (accept != "no")){
-                    Error(5);
-                }
-            }
-            if(accept == "yes"){
-                cout << endl << "Please enter your filename" << endl;
-                cin >> filename;
-            }
-            this -> ToTxtCluster(filename);
-        }
         //FOREL
         void Forel(double threshold){
             for(unsigned int i = 0; i < this -> workPoints.size(); i ++){
@@ -1412,37 +1184,6 @@ class Cluster{
                     }
                 }
             }
-        }
-        //RUN FOREL
-        void FindByForelAlghorithm(){
-            this -> BeforeStart();
-            double threshold = -1;
-            while(threshold < 0){
-                cout << endl << "Please enter your threshold" << endl;
-                cin >> threshold;
-                if(threshold < 0){
-                    Error(5);
-                }
-            }
-            this -> Forel(threshold);
-            string filename = "Forel" + to_string(this -> launchNumber) + ".txt", accept = "zzz";
-            fstream launcher;
-            this -> launchNumber ++;
-            launcher.open("launch.log", ios::in | ios::out | ios::trunc);
-            launcher << this -> launchNumber;
-            launcher.close();
-            while((accept != "yes") && (accept != "no")){
-                cout << endl << "Do you want to set your file name? ('yes'/'no')" << endl;
-                cin >> accept;
-                if((accept != "yes") && (accept != "no")){
-                    Error(5);
-                }
-            }
-            if(accept == "yes"){
-                cout << endl << "Please enter your filename" << endl;
-                cin >> filename;
-            }
-            this -> ToTxtCluster(filename);
         }
         //RECOVERY
         void GetFromFile(){
@@ -1553,14 +1294,200 @@ class Cluster{
                 }
             }
         }
-        //RUN DBSCAN
-        void FindByDBSCANAlghorithm(){
+        void DBSCANAlghorithm(double radius, int numpointsincircle){
             this -> BeforeStart();
-            vector <Point> saveData;
             saveData.resize(0);
             for(unsigned int i = 0; i < this -> workPoints.size(); i ++){
                 saveData.push_back(Point(this -> workPoints[i]));
             }
+            this -> DelPoints(radius, numpointsincircle);
+            this -> workPoints.resize(0);
+            for(unsigned int i = 0; i < this -> fieldkoord.size(); i ++){
+                this -> workPoints.push_back(Point(this -> fieldkoord[i]));
+            }
+            this -> BeforeStart();
+            this -> CreateRo();
+            this -> GenBinary(radius + eps);
+            this -> Wave();
+        }
+//SV <
+};
+
+class Cluster{
+    private:
+        unique_ptr <Field> MyField;
+        int launchNumber;
+    public:
+        Cluster(){//default constructor
+            fstream launcher;
+            launcher.open("launch.log",  ios::out | ios::trunc);
+            launcher << 1;
+            launcher.close();
+            this -> MyField.reset(new Field(0));
+        }
+        Cluster(Field *mf){//constructor
+            fstream launcher;
+            launcher.open("launch.log", ios::in | ios::out);
+            launcher >> this -> launchNumber;
+            launcher.close();
+
+            this -> MyField.reset(new Field(mf -> retALLKOORD()));
+        }
+        //RUN WAVE
+        void FindByWaveAlgorithm(){
+            this -> MyField -> BeforeStart();
+            this -> MyField -> CreateRo();
+            double threshold = -1;
+            string filename = "Wave" + to_string(this -> launchNumber) + ".txt", accept = "zzz";
+            fstream launcher;
+            this -> launchNumber ++;
+            launcher.open("launch.log", ios::in | ios::out | ios::trunc);
+            launcher << this -> launchNumber;
+            launcher.close();
+            while(threshold < 0){
+                cout << endl << "Please enter your threshold value" << endl;
+                cin >> threshold;
+                if(threshold < 0){
+                    Error(5);
+                }
+            }
+            this -> MyField -> GenBinary(threshold);
+            this -> MyField -> Wave();
+            accept = "zzz";
+            while((accept != "yes") && (accept != "no")){
+                cout << endl << "Do you want to set your file name? ('yes'/'no')" << endl;
+                cin >> accept;
+                if((accept != "yes") && (accept != "no")){
+                    Error(5);
+                }
+            }
+            if(accept == "yes"){
+                cout << endl << "Please enter your filename" << endl;
+                cin >> filename;
+            }
+            this -> MyField -> ToTxtCluster(filename);
+        }
+        //RUN KMEANS
+        void FindByKMeansAlgorithm(){
+            this -> MyField -> BeforeStart();
+            int userNumberOfClusters = -100;
+            while((userNumberOfClusters != -1) && (userNumberOfClusters < 0)){
+                cout << endl << "Please enter your number of clusters or '-1' to find optimal number" << endl;
+                cin >> userNumberOfClusters;
+                if(userNumberOfClusters > int(this -> MyField -> retTOTSIZE())){
+                    userNumberOfClusters = -1000;
+                    cout << endl << "Too big number" << endl;
+                }
+                if((userNumberOfClusters != -1) && (userNumberOfClusters < 0)){
+                    Error(5);
+                }
+            }
+            this -> MyField -> KMeans(userNumberOfClusters);
+            if(userNumberOfClusters == -1){
+                cout << endl << "Optimal number of clusters is " << this -> MyField -> RetBestK() << endl
+                << "You could rerun k-means algorithm with that value" << endl;
+            } else {
+                string filename = "K-Means" + to_string(this -> launchNumber) + ".txt", accept = "zzz";
+                fstream launcher;
+                launcher.open("launch.log", ios::in | ios::out | ios::trunc);
+                this -> launchNumber ++;
+                launcher << this -> launchNumber;
+                launcher.close();
+                while((accept != "yes") && (accept != "no")){
+                    cout << endl << "Do you want to set your file name? ('yes'/'no')" << endl;
+                    cin >> accept;
+                    if((accept != "yes") && (accept != "no")){
+                        Error(5);
+                    }
+                }
+                if(accept == "yes"){
+                    cout << endl << "Please enter your filename" << endl;
+                    cin >> filename;
+                }
+                this -> MyField -> ToTxtCluster(filename);
+            }
+        }
+        //RUN SPTR
+        void RunSpainningTreeAlgorithm(){
+            string scn1 = "TempGisto" + to_string(this -> launchNumber);
+            fstream launch;
+            this -> MyField -> BeforeStart();
+            this -> MyField -> CalculateRo();
+            this -> MyField -> FillLengths();
+            cout << endl << "You could plot '" << scn1 << "' and choose correct threshold value, then rerun wave algorithm" << endl;
+            this -> launchNumber ++;
+            launch.open("launch.log", ios::in | ios::out | ios::trunc);
+            launch << this -> launchNumber;
+            launch.close();
+            this -> FindByWaveAlgorithm();
+        }
+        //RUN HIERARCHY
+        void FindByHierarchyAlgorithm(){
+            this -> MyField -> BeforeStart();
+            int userNumberOfClusters = -100;
+            while((userNumberOfClusters != -1) && (userNumberOfClusters < 0)){
+                cout << endl << "Please enter your number of clusters" << endl;
+                cin >> userNumberOfClusters;
+                if(userNumberOfClusters > int(this -> MyField -> retTOTSIZE())){
+                    userNumberOfClusters = -1000;
+                }
+                if(userNumberOfClusters < 0){
+                    Error(5);
+                }
+            }
+            this -> MyField -> Hierarchy(userNumberOfClusters);
+            string filename = "Hierarchy" + to_string(this -> launchNumber) + ".txt", accept = "zzz";
+            fstream launcher;
+            launcher.open("launch.log", ios::in | ios::out | ios::trunc);
+            this -> launchNumber ++;
+            launcher << this -> launchNumber;
+            launcher.close();
+            while((accept != "yes") && (accept != "no")){
+                cout << endl << "Do you want to set your file name? ('yes'/'no')" << endl;
+                cin >> accept;
+                if((accept != "yes") && (accept != "no")){
+                    Error(5);
+                }
+            }
+            if(accept == "yes"){
+                cout << endl << "Please enter your filename" << endl;
+                cin >> filename;
+            }
+            this -> MyField -> ToTxtCluster(filename);
+        }
+        //RUN FOREL
+        void FindByForelAlghorithm(){
+            this -> MyField -> BeforeStart();
+            double threshold = -1;
+            while(threshold < 0){
+                cout << endl << "Please enter your threshold" << endl;
+                cin >> threshold;
+                if(threshold < 0){
+                    Error(5);
+                }
+            }
+            this -> MyField -> Forel(threshold);
+            string filename = "Forel" + to_string(this -> launchNumber) + ".txt", accept = "zzz";
+            fstream launcher;
+            this -> launchNumber ++;
+            launcher.open("launch.log", ios::in | ios::out | ios::trunc);
+            launcher << this -> launchNumber;
+            launcher.close();
+            while((accept != "yes") && (accept != "no")){
+                cout << endl << "Do you want to set your file name? ('yes'/'no')" << endl;
+                cin >> accept;
+                if((accept != "yes") && (accept != "no")){
+                    Error(5);
+                }
+            }
+            if(accept == "yes"){
+                cout << endl << "Please enter your filename" << endl;
+                cin >> filename;
+            }
+            this -> MyField -> ToTxtCluster(filename);
+        }
+        //RUN DBSCAN
+        void FindByDBSCANAlghorithm(){
             double radius = -1;
             while(radius < 0){
                 cout << endl << "Please enter your radius" << endl;
@@ -1577,15 +1504,7 @@ class Cluster{
                     Error(5);
                 }
             }
-            this -> DelPoints(radius, NumNearPoints);
-            this -> workPoints.resize(0);
-            for(unsigned int i = 0; i < this -> fieldkoord.size(); i ++){
-                this -> workPoints.push_back(Point(this -> fieldkoord[i]));
-            }
-            this -> BeforeStart();
-            this -> CreateRo();
-            this -> GenBinary(radius + eps);
-            this -> Wave();
+            this -> MyField -> DBSCANAlghorithm(radius, NumNearPoints);
             string filename = "DBSCAN" + to_string(this -> launchNumber) + ".txt", accept = "zzz";
             fstream launcher;
             this -> launchNumber ++;
@@ -1603,11 +1522,7 @@ class Cluster{
                 cout << endl << "Please enter your filename" << endl;
                 cin >> filename;
             }
-            this -> ToTxtCluster(filename);
-            this -> workPoints.resize(0);
-            for(unsigned int i = 0; i < saveData.size(); i ++){
-                this -> workPoints.push_back(Point(saveData[i]));
-            }
+            this -> MyField -> ToTxtCluster(filename);
         }
 };
 
