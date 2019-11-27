@@ -1,2 +1,0 @@
-# MechMath
-MGU Trash Tasks
