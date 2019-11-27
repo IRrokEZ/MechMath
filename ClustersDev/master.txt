@@ -1,0 +1,22 @@
+genfield
+work
+4
+-64 54
+-20 20
+RC
+45
+esc
+-54 64
+-20 20
+RC
+135
+esc
+-100 100
+-17 7
+esc
+-20 20
+-20 20
+esc
+no
+yes
+exit
