@@ -14,6 +14,8 @@ const double eps = 0.0000001;
 
 using namespace std;
 
+//some changes
+
 fstream Mylog;
 
 int MN(int a, int b){
