@@ -16,13 +16,6 @@ using namespace std;
 
 fstream Mylog;
 
-/*
-
-How to write into file:
-Mylog << somedata << endl;
-
-*/
-
 int MN(int a, int b){
     return ((a > b) ? b : a);
 }
@@ -37,14 +30,38 @@ double GradToRad(double Grad){//convertion of degrees to radians
 
 void Error(int type){
     switch(type){
-        case 1: cout << endl << "Size of vector less than 1" << endl; break;
-        case 2: cout << endl << "Size of group less than 1" << endl; break;
-        case 3: cout << endl << "Couldn't open file" << endl; break;
-        case 4: cout << endl << "Worksize mustn't be less than 1" << endl; break;
-        case 5: cout << endl << "Incorrect input. Please try again" << endl; break;
-        case 6: cout << endl << "Incorrect value of point' label" << endl; break;
-        case 7: cout << endl << "Incorrect file data" << endl; break;
-        default: cout << endl << "Unnamed Error" << endl; break;
+        case 1:
+            cout << endl << "Size of vector less than 1" << endl;
+            Mylog << "Error! Size of vector less than 1" << endl;
+            break;
+        case 2:
+            cout << endl << "Size of group less than 1" << endl;
+            Mylog << "Error! Size of group less than 1" << endl;
+            break;
+        case 3:
+            cout << endl << "Couldn't open file" << endl;
+            Mylog << "Error! Couldn't open file" << endl;
+            break;
+        case 4:
+            cout << endl << "Worksize mustn't be less than 1" << endl;
+            Mylog << "Error! Worksize mustn't be less than 1" << endl;
+            break;
+        case 5:
+            cout << endl << "Incorrect input. Please try again" << endl;
+            Mylog << "Error! Incorrect input. Please try again" << endl;
+            break;
+        case 6:
+            cout << endl << "Incorrect value of point's label" << endl;
+            Mylog << "Error! Incorrect value of point's label" << endl;
+            break;
+        case 7:
+            cout << endl << "Incorrect file data" << endl;
+            Mylog << "Error! Incorrect file data" << endl;
+            break;
+        default:
+            cout << endl << "Unnamed Error" << endl;
+            Mylog << "Error! Unnamed Error" << endl;
+            break;
     }
 }
 
@@ -1313,6 +1330,28 @@ class Field{
 //SV <
 };
 
+class Find{
+    private:
+        string algname;
+        vector <Point> findrez;
+        int numclust, numrubb;
+        vector <double> centers, leftborders, rightborders, topborders, butttomborders;
+    public:
+        Find(){
+            this -> algname = "";
+            this -> numclust = 0;
+            this -> numrubb = 0;
+            this -> findrez.resize(0);
+            this -> centers.resize(0);
+            this -> leftborders.resize(0);
+            this -> rightborders.resize(0);
+            this -> topborders.resize(0);
+            this -> butttomborders.resize(0);
+        }
+        Find(string alg, const vector <Point>& values){
+        }
+};
+
 class Cluster{
     private:
         unique_ptr <Field> MyField;
@@ -1526,6 +1565,8 @@ class Cluster{
         }
 };
 
+
+
 class Interface{
     private:
         int sz;
@@ -1556,11 +1597,13 @@ class Interface{
                 trg = -1;
                 cout << endl << " Please enter the command" << endl;
                 cin >> command;
+                Mylog << "command: " << "'"<< command <<"'" << endl;
                 if((command == "setsize")){//generation of ravn vector (DEMO)
                     int newsz = 0;
                     while(newsz < 1){
                         cout << endl << "Please enter size (number of points)" << endl;
                         cin >> newsz;
+                        Mylog << newsz << " points in one group" << endl;
                         if(newsz < 1){
                             Error(4);
                         }
@@ -1572,6 +1615,7 @@ class Interface{
                     double mn, mx;
                     cout << endl << " Please enter min and max value of random" << endl;
                     cin >> mn >> mx;
+                    Mylog << mn << " " << mx << endl;
                     unique_ptr <Control> RND(new Control());
                     RND -> GenRnd(this -> sz, mn, mx);
                     RND -> FileRavn();
@@ -1581,6 +1625,7 @@ class Interface{
                     double mn, mx;
                     cout << endl << " Please enter min and max value of random" << endl;
                     cin >> mn >> mx;
+                    Mylog << mn << " " << mx << endl;
                     unique_ptr <Control> NORM(new Control());
                     NORM -> GenNorm(this -> sz, mn, mx);
                     NORM -> FileNorm();
@@ -1590,8 +1635,10 @@ class Interface{
                     double mnx, mxx, mny, mxy;
                     cout << endl << " Please enter min and max value of random (x)" << endl;
                     cin >> mnx >> mxx;
+                    Mylog << mnx << " " << mxx << endl;
                     cout << endl << " Please enter min and max value of random (y)" << endl;
                     cin >> mny >> mxy;
+                    Mylog << mny << " " << mxy << endl;
                     unique_ptr <Control> GROUP(new Control());
                     GROUP -> GenGroup(this -> sz, mnx, mxx, mny, mxy, 0);
                     GROUP -> FileGroup();
@@ -1603,8 +1650,10 @@ class Interface{
                     cout << endl << "Please create new group to show this function" << endl << endl;
                     cout << endl << " Please enter min and max value of random (x)" << endl;
                     cin >> mnx >> mxx;
+                    Mylog << mnx << " " << mxx << endl;
                     cout << endl << " Please enter min and max value of random (y)" << endl;
                     cin >> mny >> mxy;
+                    Mylog << mny << " " << mxy << endl;
                     unique_ptr <Control> work (new Control());
                     work -> GenGroup(this -> sz, mnx, mxx, mny, mxy, 0); //base group
                     fstream rotated;
@@ -1615,6 +1664,7 @@ class Interface{
                     work -> FileGroup();
                     cout << endl << " Please enter angle" << endl;
                     cin >> phi;
+                    Mylog << phi << endl;
                     phi = GradToRad(phi);
                     work -> turnNULL(phi);
                     gr = work -> RetGroup();
@@ -1631,8 +1681,10 @@ class Interface{
                     cout << endl << "Please create new group to show this function" << endl;
                     cout << endl << " Please enter min and max value of random (x)" << endl;
                     cin >> mnx >> mxx;
+                    Mylog << mnx << " " << mxx << endl;
                     cout << endl << " Please enter min and max value of random (y)" << endl;
                     cin >> mny >> mxy;
+                    Mylog << mny << " " << mxy << endl;
                     unique_ptr <Control> work (new Control());
                     work -> GenGroup(this -> sz, mnx, mxx, mny, mxy, 0); //base group
                     fstream rotated;
@@ -1643,6 +1695,7 @@ class Interface{
                     work -> FileGroup();
                     cout << endl << " Please enter angle" << endl;
                     cin >> phi;
+                    Mylog << phi << endl;
                     phi = GradToRad(phi);
                     work -> turnCenter(phi);
                     gr = work -> RetGroup();
@@ -1659,8 +1712,10 @@ class Interface{
                     cout << endl << " Please create new group to show this function" << endl;
                     cout << endl << " Please enter min and max value of random (x)" << endl;
                     cin >> mnx >> mxx;
+                    Mylog << mnx << " " << mxx << endl;
                     cout << endl << " Please enter min and max value of random (y)" << endl;
                     cin >> mny >> mxy;
+                    Mylog << mny << " " << mxy << endl;
                     unique_ptr <Control> work (new Control());
                     work -> GenGroup(this -> sz, mnx, mxx, mny, mxy, 0); //base group
                     fstream moved;
@@ -1671,6 +1726,7 @@ class Interface{
                     work -> FileGroup();
                     cout << endl << " Please enter delta X" << endl;
                     cin >> delx;
+                    Mylog << delx << endl;
                     work -> MoveX(delx);
                     gr = work -> RetGroup();
                     for(int i = 0; i < this -> sz; i ++){
@@ -1686,8 +1742,10 @@ class Interface{
                     cout << endl << " Please create new group to show this function" << endl;
                     cout << endl << " Please enter min and max value of random (x)" << endl;
                     cin >> mnx >> mxx;
+                    Mylog << mnx << " " << mxx << endl;
                     cout << endl << " Please enter min and max value of random (y)" << endl;
                     cin >> mny >> mxy;
+                    Mylog << mny << " " << mxx << endl;
                     unique_ptr <Control> work (new Control());
                     work -> GenGroup(this -> sz, mnx, mxx, mny, mxy, 0); //base group
                     fstream moved;
@@ -1698,6 +1756,7 @@ class Interface{
                     work -> FileGroup();
                     cout << endl << " Please enter delta Y" << endl;
                     cin >> dely;
+                    Mylog << dely << endl;
                     work -> MoveY(dely);
                     gr = work -> RetGroup();
                     for(int i = 0; i < this -> sz; i ++){
@@ -1718,16 +1777,20 @@ class Interface{
                         cout << endl << "Please enter 'get' to read field from file" << endl;
                         cout << endl << "Please enter 'work' to work in basik mode" << endl;
                         cin >> com;
+                        //Mylog << com << endl;
                         if((com != "get") && (com!="work")){
                             Error(5);//incorrect value
                         }
                     }
                     if(com == "work"){
+                        Mylog << "command: 'work'" << endl;
                         while(numofgroups < 1){
                             cout << endl << " Please enter number of groups in field (>=1)" << endl;
                             cin >> numofgroups;
+                            Mylog <<"  "<< numofgroups << " groups generated: " << endl;
                             if(numofgroups < 1){
                                 cout << endl << " Error! Please enter correctly value" << endl;
+                                Mylog << "Error! Incorrect value" << endl;
                             }
                         }
                         MyField.reset(new Field(numofgroups));
@@ -1735,8 +1798,10 @@ class Interface{
                             com = "start";
                             cout << endl << " Please enter min and max value of random (x)" << endl;
                             cin >> mnx >> mxx;
+                            Mylog << "  X adges: " << mnx << " " << mxx << endl;
                             cout << endl << " Please enter min and max value of random (y)" << endl;
                             cin >> mny >> mxy;
+                            Mylog << "  Y adges: " << mny << " " << mxy << endl;
                             temp.reset(new Group(this -> sz, mnx, mny, mxx, mxy, i));
                             while(com != "esc"){
                                 tr = -1;
@@ -1746,10 +1811,13 @@ class Interface{
                                 cout << endl << " Enter 'MY' to move Y" << endl;
                                 cout << endl << " Enter 'esc' to finish field creating" << endl;
                                 cin >> com;
+                                //Mylog << com << endl;
                                 if(com == "RN"){//turning of the group (0;0)
+                                    Mylog << "  RN - turning (0,0)" << endl;
                                     double alf;
                                     cout << endl << " Please enter angle" << endl;
                                     cin >> alf;
+                                    Mylog << "  angle: "<< alf << endl;
                                     alf = GradToRad(alf);
                                     unique_ptr <Control> work = temp -> Ret_Field_Group();
                                     work -> turnNULL(alf);
@@ -1757,9 +1825,11 @@ class Interface{
                                     tr = 0;
                                 }
                                 else if(com == "RC"){//turning of the group (Center)
+                                    Mylog << "  RC - turning (Center)" << endl;
                                     double alf;
                                     cout << endl << " Please enter angle" << endl;
                                     cin >> alf;
+                                    Mylog << "  angle: "<< alf << endl;
                                     alf = GradToRad(alf);
                                     unique_ptr <Control> work = temp -> Ret_Field_Group();
                                     work -> turnCenter(alf);
@@ -1767,24 +1837,29 @@ class Interface{
                                     tr = 0;
                                 }
                                 else if(com == "MX"){//moving X
+                                    Mylog << "  MX - moving X" << endl;
                                     double dx;
                                     unique_ptr <Control> work = temp -> Ret_Field_Group();
                                     cout << endl << " Enter delta x" << endl;
                                     cin >> dx;
+                                    Mylog <<"  delta x: "<<   dx << endl;
                                     work -> MoveX(dx);
                                     temp -> Regrupp(work);
                                     tr = 0;
                                 }
                                 else if(com == "MY"){//moving Y
+                                    Mylog << "  MY - moving Y" << endl;
                                     double dy;
                                     unique_ptr <Control> work = temp -> Ret_Field_Group();
                                     cout << endl << " Enter delta y" << endl;
                                     cin >> dy;
+                                    Mylog << "  delta y: "<< dy << endl;
                                     work -> MoveY(dy);
                                     temp -> Regrupp(work);
                                     tr = 0;
                                 }
                                 if(tr == -1){
+                                    Mylog << "command: 'esc'" << endl;
                                     if(com != "esc"){
                                         Error(5); //incorrect value
                                         com = "start";
@@ -1795,8 +1870,10 @@ class Interface{
                         }
                     }
                     else if (com == "get"){
-                        MyCluster -> GetFromFile();
-                        MyCluster -> ToTxtCluster("Field.txt");
+                        Mylog << "command: 'get'" << endl;
+                        MyField -> GetFromFile();
+                        MyField -> ToTxtCluster("Field.txt");
+                        MyCluster.reset(new Cluster(MyField.get()));
                     }
                     if(com != "get"){
                         MyField -> MakeAllKoord();
@@ -1812,6 +1889,7 @@ class Interface{
                         }
                     }
                     if(q == "no"){
+                        Mylog << "No clusters found" << endl;
                         q = "esc";
                     }
                     while(q != "esc"){
@@ -1821,18 +1899,25 @@ class Interface{
                         << "To Exit enter 'esc'" << endl;
                         cin >> q;
                         if(q == "wave"){
+                            Mylog << "WAVE algorithm" << endl;
                             MyCluster -> FindByWaveAlgorithm();
                         } else if (q == "km"){
+                            Mylog << "K-MEANS algorithm" << endl;
                             MyCluster -> FindByKMeansAlgorithm();
                         } else if (q == "sptr"){
+                            Mylog << "SPANNING TREE algorithm" << endl;
                             MyCluster -> RunSpainningTreeAlgorithm();
                         } else if (q == "ie"){
+                            Mylog << "HIERARCHY algorithm" << endl;
                             MyCluster -> FindByHierarchyAlgorithm();
                         } else if (q == "fish"){
+                            Mylog << "FOREL algorithm" << endl;
                             MyCluster -> FindByForelAlghorithm();
                         } else if (q == "dbs"){
+                            Mylog << "DBSCAN algorithm" << endl;
                             MyCluster -> FindByDBSCANAlghorithm();
                         } else if (q != "esc"){
+                            Mylog << "esc" << endl;
                             Error(5);
                         }
                     }
@@ -1843,6 +1928,7 @@ class Interface{
                         break;
                     } else{
                         cout << " Error! Enter correct command" << endl;
+                        Mylog << "Error! Incorrect command" << endl;
                     }
                 }
                 else if(trg == 0){
@@ -1869,10 +1955,12 @@ class InterfaceSTR{
             cout << endl << "Please enter master filename" << endl;
             getline(cin, fname);
             //cin >> fname;
+            Mylog << "Master filename is: " << fname << endl;
             fstream master;
             master.open(fname, ios::in);
             if(!master.is_open()){
                 cout << endl << "File open error" << endl;
+                Mylog << "File open error" << endl;
             } else {
                 while(!master.eof()){
                     getline(master, fname);
@@ -1892,12 +1980,14 @@ class InterfaceSTR{
                 command = this -> comlist[pos];
                 pos ++;
                 if((command == "setsize")){//generation of ravn vector (DEMO)
+                    Mylog << "command: 'setsize'"<< endl;
                     int newsz = 0;
                     while(newsz < 1){
                         strm << this -> comlist[pos];
                         pos ++;
                         strm >> newsz;
                         strm.clear();
+                        Mylog << "  "<< newsz << " groups created:" << endl;
                         if(newsz < 1){
                             Error(4);
                         }
@@ -1906,10 +1996,12 @@ class InterfaceSTR{
                     trg = 0;
                 }
                 if((command == "genrnd")){//generation of ravn vector (DEMO)
+                    Mylog << "command: 'genrnd'"<< endl;
                     double mn, mx;
                     strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                     pos ++;
                     strm >> mn >> mx;
+                    Mylog << mn << " "<< mx << endl;
                     strm.clear();
                     unique_ptr <Control> RND(new Control());
                     RND -> GenRnd(this -> sz, mn, mx);
@@ -1917,10 +2009,12 @@ class InterfaceSTR{
                     trg = 0;
                 }
                 else if(command == "gennorm"){//generation of norm vector (DEMO)
+                    Mylog << "command: 'gennorm'"<< endl;
                     double mn, mx;
                     strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                     pos ++;
                     strm >> mn >> mx;
+                    Mylog << mn << " " << mx << endl;
                     strm.clear();
                     unique_ptr <Control> NORM(new Control());
                     NORM -> GenNorm(this -> sz, mn, mx);
@@ -1928,14 +2022,17 @@ class InterfaceSTR{
                     trg = 0;
                 }
                 else if(command == "gengroup"){//generation of a group of points (DEMO)
+                    Mylog << "command: 'gengroup'"<< endl;
                     double mnx, mxx, mny, mxy;
                     strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                     pos ++;
                     strm >> mnx >> mxx;
+                    Mylog << mnx << " " << mxx << endl;
                     strm.clear();
                     strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                     pos ++;
                     strm >> mny >> mxy;
+                    Mylog << mny << " " << mxy << endl;
                     strm.clear();
                     unique_ptr <Control> GROUP(new Control());
                     GROUP -> GenGroup(this -> sz, mnx, mxx, mny, mxy, 0);
@@ -1943,15 +2040,18 @@ class InterfaceSTR{
                     trg = 0;
                 }
                 else if(command == "rollN"){//turning of the group (0;0) (DEMO)
+                    Mylog << "command: 'rollN'"<< endl;
                     double phi, mnx, mny, mxx, mxy;
                     vector <Point> gr;
                     strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                     pos ++;
                     strm >> mnx >> mxx;
+                    Mylog << mnx << " " << mxx << endl;
                     strm.clear();
                     strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                     pos ++;
                     strm >> mny >> mxy;
+                    Mylog << mny << " " << mxy << endl;
                     strm.clear();
                     unique_ptr <Control> work (new Control());
                     work -> GenGroup(this -> sz, mnx, mxx, mny, mxy, 0); //base group
@@ -1964,6 +2064,7 @@ class InterfaceSTR{
                     strm << this -> comlist[pos];
                     pos ++;
                     strm >> phi;
+                    Mylog << "  angle: "<< phi << endl;
                     strm.clear();
                     phi = GradToRad(phi);
                     work -> turnNULL(phi);
@@ -1976,15 +2077,18 @@ class InterfaceSTR{
                     trg = 0;
                 }
                 else if(command == "rollC"){//turning of the group (Center) (DEMO)
+                    Mylog << "command: 'rollC'"<< endl;
                     double phi, mnx, mny, mxx, mxy;
                     vector <Point> gr;
                     strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                     pos ++;
                     strm >> mnx >> mxx;
+                    Mylog << mnx << " " << mxx << endl;
                     strm.clear();
                     strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                     pos ++;
                     strm >> mny >> mxy;
+                    Mylog << mny << " " << mxy << endl;
                     strm.clear();
                     unique_ptr <Control> work (new Control());
                     work -> GenGroup(this -> sz, mnx, mxx, mny, mxy, 0); //base group
@@ -1997,6 +2101,7 @@ class InterfaceSTR{
                     strm << this -> comlist[pos];
                     pos ++;
                     strm >> phi;
+                    Mylog << "  angle: "<< phi << endl;
                     strm.clear();
                     phi = GradToRad(phi);
                     work -> turnCenter(phi);
@@ -2009,15 +2114,18 @@ class InterfaceSTR{
                     trg = 0;
                 }
                 else if(command == "moveX"){//moving X (DEMO)
+                    Mylog << "command: 'moveX'"<< endl;
                     double delx, mnx, mny, mxx, mxy;
                     vector <Point> gr;
                     strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                     pos ++;
                     strm >> mnx >> mxx;
+                    Mylog << mnx <<" " << mxx << endl;
                     strm.clear();
                     strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                     pos ++;
                     strm >> mny >> mxy;
+                    Mylog << mny << " " << mxy << endl;
                     strm.clear();
                     unique_ptr <Control> work (new Control());
                     work -> GenGroup(this -> sz, mnx, mxx, mny, mxy, 0); //base group
@@ -2030,6 +2138,7 @@ class InterfaceSTR{
                     strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                     pos ++;
                     strm >> delx;
+                    Mylog << delx << endl;
                     strm.clear();
                     work -> MoveX(delx);
                     gr = work -> RetGroup();
@@ -2041,15 +2150,18 @@ class InterfaceSTR{
                     trg = 0;
                 }
                 else if(command == "moveY"){//moving Y (DEMO)
+                    Mylog << "command: 'moveY'"<< endl;
                     double dely, mnx, mny, mxx, mxy;
                     vector <Point> gr;
                     strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                     pos ++;
                     strm >> mnx >> mxx;
+                    Mylog << mnx << mxx << endl;
                     strm.clear();
                     strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                     pos ++;
                     strm >> mny >> mxy;
+                    Mylog << mny << mxy << endl;
                     strm.clear();
                     unique_ptr <Control> work (new Control());
                     work -> GenGroup(this -> sz, mnx, mxx, mny, mxy, 0); //base group
@@ -2062,6 +2174,7 @@ class InterfaceSTR{
                     strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                     pos ++;
                     strm >> dely;
+                    Mylog << dely << endl;
                     strm.clear();
                     work -> MoveY(dely);
                     gr = work ->RetGroup();
@@ -2073,6 +2186,7 @@ class InterfaceSTR{
                     trg = 0;
                 }
                 else if(command == "genfield"){//field creating
+                    Mylog << "command: 'genfield'"<< endl;
                     int numofgroups = 0, tr;
                     double mnx, mny, mxx, mxy;
                     string com = this -> comlist[pos];
@@ -2084,9 +2198,11 @@ class InterfaceSTR{
                         Error(5);//incorrect value
                     } else {
                         if(com == "work"){
+                            Mylog << "command: 'work'" << endl;
                             strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                             pos ++;
                             strm >> numofgroups;
+                            Mylog << "  "<< numofgroups << " groups created:" << endl;
                             strm.clear();
                             if(numofgroups < 1){
                                 Error(5);
@@ -2096,22 +2212,27 @@ class InterfaceSTR{
                                 strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                                 pos ++;
                                 strm >> mnx >> mxx;
+                                Mylog << "  X adges: " << mnx << " " << mxx << endl;
                                 strm.clear();
                                 strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                                 pos ++;
                                 strm >> mny >> mxy;
+                                Mylog << "  Y adges: " << mny << " " << mxy << endl;
                                 strm.clear();
                                 temp.reset(new Group(this -> sz, mnx, mny, mxx, mxy, i));
                                 com = "start";
                                 while(com != "esc"){
                                     tr = -1;
                                     com = this -> comlist[pos];
+                                    Mylog << com << endl;
                                     pos ++;
                                     if(com == "RN"){//turning of the group (0;0)
+                                        Mylog << "  'RN' - turning (0,0)" << endl;
                                         double alf;
                                         strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                                         pos ++;
                                         strm >> alf;
+                                        Mylog << "  angle: " << alf << endl;
                                         strm.clear();
                                         alf = GradToRad(alf);
                                         unique_ptr <Control> work = temp -> Ret_Field_Group();
@@ -2120,10 +2241,12 @@ class InterfaceSTR{
                                         tr = 0;
                                     }
                                     else if(com == "RC"){//turning of the group (Center)
+                                        Mylog << "  'RC' - turning (Center)" << endl;
                                         double alf;
                                         strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                                         pos ++;
                                         strm >> alf;
+                                        Mylog << "  angle: " << alf << endl;
                                         strm.clear();
                                         alf = GradToRad(alf);
                                         unique_ptr <Control> work = temp -> Ret_Field_Group();
@@ -2132,28 +2255,33 @@ class InterfaceSTR{
                                         tr = 0;
                                     }
                                     else if(com == "MX"){//moving X
+                                        Mylog << "  'MX' - moving x" << endl;
                                         double dx;
                                         unique_ptr <Control> work = temp -> Ret_Field_Group();
                                         strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                                         pos ++;
                                         strm >> dx;
+                                        Mylog <<"  delta x"<< dx << endl;
                                         strm.clear();
                                         work -> MoveX(dx);
                                         temp -> Regrupp(work);
                                         tr = 0;
                                     }
                                     else if(com == "MY"){//moving Y
+                                        Mylog << "  'MY' - moving y" << endl;
                                         double dy;
                                         unique_ptr <Control> work = temp -> Ret_Field_Group();
                                         strm << this -> comlist[pos]; //we hope that file has structure <mn> <mx> in 1 line
                                         pos ++;
                                         strm >> dy;
+                                        Mylog <<"  delta y: "<< dy << endl;
                                         strm.clear();
                                         work -> MoveY(dy);
                                         temp -> Regrupp(work);
                                         tr = 0;
                                     }
                                     if(tr == -1){
+                                        Mylog << "command: 'esc'" << endl;
                                         if(com != "esc"){
                                             Error(5); //incorrect value
                                         }
@@ -2163,8 +2291,10 @@ class InterfaceSTR{
                             }
                         }
                         else if (com == "get"){
-                            MyCluster -> GetFromFile();
-                            MyCluster -> ToTxtCluster("Field.txt");
+                            Mylog << "command: 'get'" << endl;
+                            MyField -> GetFromFile();
+                            MyField -> ToTxtCluster("Field.txt");
+                            MyCluster.reset(new Cluster(MyField.get()));
                         }
                         if(com != "get"){
                             MyField -> MakeAllKoord();
@@ -2180,6 +2310,7 @@ class InterfaceSTR{
                             Error(5);
                         }
                         if(q == "no"){
+                            Mylog << "No clusters found" << endl;
                             q = "esc";
                         }
                         while(q != "esc"){
@@ -2189,18 +2320,25 @@ class InterfaceSTR{
                             << "To Exit enter 'esc'" << endl;
                             cin >> q;
                             if(q == "wave"){
+                                Mylog << "WAVE algorithm" << endl;
                                 MyCluster -> FindByWaveAlgorithm();
                             } else if (q == "km"){
+                                Mylog << "K-MEANS algorithm" << endl;
                                 MyCluster -> FindByKMeansAlgorithm();
                             } else if (q == "sptr"){
+                                Mylog << "SPANNING TREE algorithm" << endl;
                                 MyCluster -> RunSpainningTreeAlgorithm();
                             } else if (q == "ie"){
+                                Mylog << "HIERARCHY algorithm" << endl;
                                 MyCluster -> FindByHierarchyAlgorithm();
                             } else if (q == "fish"){
+                                Mylog << "FOREL algorithm" << endl;
                                 MyCluster -> FindByForelAlghorithm();
                             } else if (q == "dbs"){
+                                Mylog << "DBSCAN algorithm" << endl;
                                 MyCluster -> FindByDBSCANAlghorithm();
                             } else if (q != "esc"){
+                                Mylog << "esc" << endl;
                                 Error(5);
                             }
                         }
@@ -2210,6 +2348,7 @@ class InterfaceSTR{
                     }
                     if(trg == -1){
                         if(command == "exit"){
+                            Mylog << "command: 'exit'" << endl;
                             break;
                         } else{
                             Error(5);
@@ -2238,9 +2377,11 @@ int main(){
         }
     }
     if(var == "hand"){
+        Mylog << "command: 'hand'" << endl;
         unique_ptr <Interface> MyProject (new Interface());
         MyProject -> run();
     } else {
+        Mylog << "command: 'file'" << endl;
         unique_ptr <InterfaceSTR> MyProject (new InterfaceSTR());
         MyProject -> run();
     }
