@@ -427,8 +427,67 @@ class Field{
         int fieldsize/*number of groups*/, pointer, totalsize/*number of points*/;
         vector <int> arrsz;
         vector <Point> allkoord;
+//SV >
+        vector <double> allLengths;
+        vector <int> label, counters, marks;
+
+        vector <Point> centerKoords, startPoints, save, workPoints, fieldkoord, forClusters;
+
+        vector <vector <int>> binary_table;
+        vector <vector <double>> RO;
+
+        double bestWeight, maxRO;
+        int k, fsize, optimalK, launchNumber/*count each launch this part of program*/;
+//SV <
     public:
+//SV >
+        void BeforeWork(){
+            this -> workPoints.resize(0);
+            this -> fieldkoord.resize(0);
+            this -> allLengths.resize(0); //we will set them after
+            this -> centerKoords.resize(0);
+            this -> startPoints.resize(0);
+            this -> save.resize(0);
+            this -> k = 0;
+            this -> maxRO = 0;
+            this -> optimalK = 0;
+            this -> bestWeight = 0;
+            this -> fsize = 0;
+            this -> label.resize(0);
+            this -> binary_table.resize(0);
+            this -> RO.resize(0);
+            this -> counters.resize(0);
+            this -> forClusters.resize(0);
+        }
+//SV <
+//SV >
+        void BeforeStart(){
+            for(unsigned int i = 0; i < this -> workPoints.size(); i ++){
+                this -> workPoints[i].SetLabel(0);
+            }
+            this -> fieldkoord = this -> workPoints;
+            this -> allLengths.resize(0); //we will set them after
+            this -> centerKoords.resize(0);
+            this -> startPoints.resize(0);
+            this -> save.resize(0);
+            this -> k = 0;
+            this -> maxRO = 0;
+            this -> optimalK = 0;
+            this -> bestWeight = 0;
+            this -> fsize = this -> workPoints.size();
+            this -> label.resize(this -> workPoints.size());
+            this -> binary_table.resize(this -> workPoints.size());
+            this -> RO.resize(this -> workPoints.size());
+            this -> counters.resize(0);
+            this -> forClusters.resize(0);
+            for(unsigned int i = 0; i < this -> workPoints.size(); i ++){
+                this -> binary_table[i].resize(this -> workPoints.size());
+                this -> RO[i].resize(this -> workPoints.size());
+            }
+        }
+//SV <
         Field(int numofgroups){//constructor
+            this -> BeforeWork();
             if(numofgroups > 0){
                 this -> fieldsize = numofgroups;
             } else {
@@ -440,6 +499,7 @@ class Field{
             this -> arrsz.resize(this -> fieldsize); // int default-constructs to 0
         }
         Field(const vector <Point>& koords){//constructor
+            this -> BeforeWork();
             this -> totalsize = koords.size();
             this -> allkoord = koords;
             this -> field.resize(this -> totalsize); //Reserve memory for our object
@@ -448,6 +508,7 @@ class Field{
             this -> pointer = 0;
         }
         Field(const string& filename){//constructor from file
+            this -> BeforeWork();
             this -> allkoord = arrr(filename);
             this -> totalsize = allkoord.size();
             this -> field.resize(this -> totalsize); //Reserve memory for our object
@@ -484,6 +545,11 @@ class Field{
                 }
             }
             this -> totalsize = totsize;
+//SV >
+            for(unsigned int i = 0; i < this -> allkoord.size(); i ++){
+                this -> workPoints.push_back(Point(this -> allkoord[i]));
+            }
+//SV <
         }
         void ToTxt(){//printing of the field to file
             fstream text;
