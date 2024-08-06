@@ -1,2 +1,2 @@
 # MechMath
-MGU Trash Tasks
+MSU Trash Tasks
